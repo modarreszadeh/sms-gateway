@@ -1,0 +1,116 @@
+{
+	"info": {
+		"_postman_id": "fda0ec33-ab5f-4a4e-ac6a-0ac9bbdc3bd0",
+		"name": "sms-gateway",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20972128"
+	},
+	"item": [
+		{
+			"name": "send-sms",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "userId",
+						"value": "{{userId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sender\": \"09393639116\",\n    \"receptor\": \"09121111111\",\n    \"message\": \"test development message with 42 character\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/api/sms/send",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"api",
+						"sms",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "increase-user-balance",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "userId",
+						"value": "{{userId}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"balance\": 10000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/v1/api/user/increase-balance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"api",
+						"user",
+						"increase-balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user-sms-delivery-list",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "{{userId}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/v1/api/sms/delivery-list",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"api",
+						"sms",
+						"delivery-list"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000"
+		},
+		{
+			"key": "userId",
+			"value": "65b6dc59b06ae883cbc8619d"
+		}
+	]
+}
