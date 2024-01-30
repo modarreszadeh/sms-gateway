@@ -1,11 +1,5 @@
 # SMS Gateway
 
-## Overview
-
-SMS Gateway is a scalable messaging platform built to efficiently handle the sending and receiving of SMS messages. The
-architecture is designed for horizontal scaling, leveraging MongoDB for data storage and Go (Golang) for improved
-scalability.
-
 ## Architecture
 
 ### Components:
@@ -25,19 +19,25 @@ scalability.
 The system is designed for horizontal scaling to handle increasing loads by adding more instances of the application.
 MongoDB plays a crucial role in this architecture, allowing data to be distributed across multiple nodes for improved
 performance.
-###  Build and Run Instructions:
+
+### Build and Run Instructions:
 
 #### 1. Prerequisites:
+
 Install MongoDB and Golang on your machine.
 
 #### 2. Configuration:
+
 Set up MongoDB configurations in [config.go](internal/config/config.go).
 
 #### 3. Run the Application:
+
 Execute `go run cmd/main.go` in the root directory.
 
 #### 4. Scaling:
-To horizontally scale the application, deploy multiple instances of the Golang application and configure them to connect to the same MongoDB cluster.
+
+To horizontally scale the application, deploy multiple instances of the Golang application and configure them to connect
+to the same MongoDB cluster.
 
 Project Structure:
 
