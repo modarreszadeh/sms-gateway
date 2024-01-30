@@ -3,21 +3,18 @@ package http
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/modarreszadeh/sms-gateway/internal/config"
-	"github.com/modarreszadeh/sms-gateway/pkg/queue"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Server struct {
-	db    *mongo.Database
-	echo  *echo.Echo
-	queue *queue.Queue
+	db   *mongo.Database
+	echo *echo.Echo
 }
 
-func New(db *mongo.Database, echo *echo.Echo, queue *queue.Queue) *Server {
+func New(db *mongo.Database, echo *echo.Echo) *Server {
 	server := &Server{
-		db:    db,
-		echo:  echo,
-		queue: queue,
+		db:   db,
+		echo: echo,
 	}
 
 	v1 := server.echo.Group("/v1/api")

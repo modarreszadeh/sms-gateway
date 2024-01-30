@@ -1,17 +1,9 @@
 package domain
 
 import (
+	SmsStatus "github.com/modarreszadeh/sms-gateway/internal/domain/enum"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
-)
-
-// Sms Status
-const (
-	InProgress  = iota
-	Scheduled   = 1
-	Delivered   = 2
-	Undelivered = 3
-	Failed      = 4
 )
 
 type SmsDelivery struct {
@@ -33,6 +25,6 @@ func NewSmsDelivery(userId string, sender string, receptor string, message strin
 		Message:      message,
 		Cost:         cost,
 		CreationDate: time.Now(),
-		Status:       InProgress,
+		Status:       SmsStatus.InProgress,
 	}
 }

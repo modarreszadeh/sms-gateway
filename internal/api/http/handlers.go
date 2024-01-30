@@ -3,10 +3,14 @@ package http
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/modarreszadeh/sms-gateway/internal/domain"
+	SmsStatus "github.com/modarreszadeh/sms-gateway/internal/domain/enum"
 	"github.com/modarreszadeh/sms-gateway/internal/service"
+	"github.com/modarreszadeh/sms-gateway/pkg/queue"
 	"net/http"
 	"time"
 )
+
+var smsDeliveryQueue = queue.New(10)
 
 func (server *Server) SendSmsHandler(c echo.Context) error {
 	smsDeliveryService := service.NewSmsDeliveryService(server.db)
@@ -32,6 +36,18 @@ func (server *Server) SendSmsHandler(c echo.Context) error {
 		return JsonResult(c, http.StatusBadRequest, "Inventory not enough")
 	}
 
+	userSmsConfig, err := userSmsConfigService.GetUserSmsConfigByUserId(userId)
+	if err != nil {
+		return InternalServerError(c, err)
+	}
+
+	err = userSmsConfig.DecreaseBalance(cost)
+	if err != nil {
+		return InternalServerError(c, err)
+	}
+
+	userSmsConfigService.UpdateUserSmsConfig(userId, userSmsConfig)
+
 	smsDelivery := domain.NewSmsDelivery(userId, smsDeliveryRequest.Sender,
 		smsDeliveryRequest.Receptor, smsDeliveryRequest.Message, cost)
 
@@ -40,15 +56,20 @@ func (server *Server) SendSmsHandler(c echo.Context) error {
 		return InternalServerError(c, err)
 	}
 
-	server.queue.Enqueue(deliveryId)
+	smsDeliveryQueue.Enqueue(deliveryId)
 
-	server.queue.DispatchProcess(server.SendSmsProcess)
+	smsDeliveryQueue.DispatchProcess(server.SendSmsProcess)
 
 	return Ok(c, "Sms send successfully")
 }
 
 func (server *Server) GetUserSmsDeliveryHandler(c echo.Context) error {
-	return Ok(c, "delivery endpoint")
+	smsDeliveryService := service.NewSmsDeliveryService(server.db)
+	userId := getUserId(c)
+
+	smsDeliveryList := smsDeliveryService.GetAllUserSmsDelivery(userId)
+
+	return c.JSON(http.StatusOK, smsDeliveryList)
 }
 
 func (server *Server) IncreaseUserBalance(c echo.Context) error {
@@ -74,28 +95,15 @@ func (server *Server) IncreaseUserBalance(c echo.Context) error {
 
 func (server *Server) SendSmsProcess(process interface{}) {
 	smsDeliveryService := service.NewSmsDeliveryService(server.db)
-	userSmsConfigService := service.NewUserSmsConfigService(server.db)
 
 	if deliveryId, ok := process.(string); ok {
 		var smsDelivery, _ = smsDeliveryService.GetSmsDeliveryById(deliveryId)
 
-		time.Sleep(3000 * time.Millisecond) // certain delay for send sms to operator (MCI-MTN)
+		time.Sleep(5000 * time.Millisecond) // certain delay for send sms to operator (MCI-MTN)
 		server.echo.Logger.Printf("sms with %s id and sender:[%s] send to specific Telecommunications Operator",
 			smsDelivery.Id.Hex(), smsDelivery.Receptor)
 
-		smsDeliveryService.ChangeSmsDeliveryStatus(deliveryId, domain.Delivered)
-
-		userSmsConfig, err := userSmsConfigService.GetUserSmsConfigByUserId(smsDelivery.UserId)
-		if err != nil {
-			return
-		}
-
-		err = userSmsConfig.DecreaseBalance(smsDelivery.Cost)
-		if err != nil {
-			return
-		}
-
-		userSmsConfigService.UpdateUserSmsConfig(smsDelivery.UserId, userSmsConfig)
+		smsDeliveryService.ChangeSmsDeliveryStatus(deliveryId, SmsStatus.Delivered)
 	}
 }
 
